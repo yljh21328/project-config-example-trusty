@@ -1,9 +1,14 @@
 # Example project-config repository
 
 This is an example project-config repository for use as a
-starting point to setup a 3rd party CI account.
+starting point to setup a 3rd party CI account. It is expected that you
+fork this repository or otherwise copy it to your own repository. Any
+changes to this version are expected to remain within the scope of an
+'example' to help others get started. Refer to
+[openstack-infra/project-config](https://git.openstack.org/cgit/openstack-infra/project-config/)
+for a more complete production configuration.
 
-## Steps to begin customization
+# Steps to begin customization
 
 The project-config repository is intended to contain custom configurations
 needed by each CI system.
@@ -24,7 +29,7 @@ the full configuration details in the [Zuul manual](http://docs.openstack.org/in
 ## Customize Nodepool
 
 The nodepool configuration is located in `nodepool/nodepool.yaml`. You can
-find the full configuration details in the [Nodepool manual](http://docs.openstack.org/infra/nodepool/).
+find the full configuration instructions in the [Nodepool manual](http://docs.openstack.org/infra/nodepool/).
 There are a few configuration that need to be updated.
 
 1. There are some user names and passwords that need to be configured.
@@ -41,13 +46,31 @@ There are a few configuration that need to be updated.
    If so, see this [README](http://git.openstack.org/cgit/openstack-infra/project-config/tree/nodepool/elements/README.rst)
    for help.
 
+4. Update the nodepool/nodepool.yaml `diskimages` configuration to
+   match the elements you included in the previous step. If you included everything, the defaults
+   provide a good starting point. Otherwise, adjust them as needed as explained
+   in the [nodepool manual](http://docs.openstack.org/infra/nodepool/configuration.html#diskimages).
+
 ## Customize Jenkins Jobs
 
 Adjust the jenkins jobs in `jenkins/jobs/` to your needs. You can find the full configuration details in the
 [Jenkins Job Builder manual](http://docs.openstack.org/infra/jenkins-job-builder/)
 
 1. Change the value of the `$PUBLISH_HOST` to the host (without https:// prefix) you will publish
-   job artifacts to. This is also known as the Log server. You can set one up using [this script]
+   job artifacts to. This is also known as the Log server. You can set one up using
+   [openstackci::logserver puppet class](https://git.openstack.org/cgit/openstack-infra/puppet-openstackci/tree/manifests/logserver.pp)
 
+## Basic checks
 
+1. Run `tox` to run some basic syntax checks to validate the syntax of your configuration files.
+
+## Credits
+
+This repository is based on work created from the following sources:
+
+1. [openstack-infra/project-config](https://git.openstack.org/cgit/openstack-infra/project-config/)
+
+2. [rasselin/os-ext-testing-data](https://github.com/rasselin/os-ext-testing-data)
+
+3. [jaypipes/os-ext-testing-data](https://github.com/jaypipes/os-ext-testing-data)
 
