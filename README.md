@@ -40,7 +40,7 @@ There are a few configuration that need to be updated.
 
 3. Setup an intial set of nodepool scripts and elements. Start by cloning
    OpenStack's [project-config](https://git.openstack.org/cgit/openstack-infra/project-config/)
-   and copy the contents of that repo's `nodepool/elements` to your repo's
+   and copying the entire contents of that repo's `nodepool/elements` to your repo's
    `nodepool/elements`. Optionally do the same for the `nodepool/scripts`
    folder. You may have to change these elements to work in your environment.
    If so, see this [README](http://git.openstack.org/cgit/openstack-infra/project-config/tree/nodepool/elements/README.rst)
@@ -56,7 +56,8 @@ There are a few configuration that need to be updated.
 Adjust the jenkins jobs in `jenkins/jobs/` to your needs. You can find the full configuration details in the
 [Jenkins Job Builder manual](http://docs.openstack.org/infra/jenkins-job-builder/)
 
-1. Change the value of the `$PUBLISH_HOST` to the host (without https:// prefix) you will publish
+1. Change the value of the `<your-log-server>` in project-config-example/jenkins/jobs/macros-common.yaml
+   to the host you will publish
    job artifacts to. This is also known as the Log server. You can set one up using
    [openstackci::logserver puppet class](https://git.openstack.org/cgit/openstack-infra/puppet-openstackci/tree/manifests/logserver.pp)
 
