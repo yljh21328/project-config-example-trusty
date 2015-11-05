@@ -63,6 +63,9 @@ Adjust the jenkins jobs in `jenkins/jobs/` to your needs. You can find the full 
 
 ## Basic checks
 
+Prerequisites: The following packages need to be installed for the `zuul` tox environment tests to pass:
+sudo apt-get install libxml2-dev libxslt1-dev  python-dev build-essential
+
 1. Run `tox` to run some basic syntax checks to validate the syntax of your configuration files.
 
 ## Credits
