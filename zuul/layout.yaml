@@ -19,19 +19,9 @@ pipelines:
     success:
       gerrit:
         verified: 1
-      smtp:
-        #TODO: Update these to real e-mail addresses
-        to: third_party_ci@example.com
-        from: zuul@example.com
-        subject: 'Silent check of {change.project} {change.number},{change.patchset} passed'
     failure:
       gerrit:
         verified: -1
-      smtp:
-        #TODO: Update these to real e-mail addresses
-        to: third_party_ci@example.com
-        from: zuul@example.com
-        subject: 'Silent check of {change.project} {change.number},{change.patchset} failed'
     merge-failure:
       smtp:
         #TODO: Update these to real e-mail addresses
