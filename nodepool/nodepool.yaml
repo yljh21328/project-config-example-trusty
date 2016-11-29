@@ -38,7 +38,7 @@ diskimages:
         - openstack-repos
         - puppet
         - nodepool-base
-        - node-devstack
+        - cache-devstack
       release: trusty
       env-vars:
         TMPDIR: /opt/dib_tmp
