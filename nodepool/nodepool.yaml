@@ -47,11 +47,11 @@ diskimages:
 providers:
   - name: local_01
 #TODO: Update the provider username, password, and authurl
-    username: '<%= provider_username %>'
-    password: '<%= provider_password %>'
-    auth-url: 'http://<openstack cloud>:5000/v2.0'
+    username: 'admin'
+    password: 'Aa12345678'
+    auth-url: 'http://10.77.210.47:5000/v2.0'
     project-name: 'admin'
-    max-servers: 2
+    max-servers: 1
     images:
       - name: dpc
         min-ram: 8192

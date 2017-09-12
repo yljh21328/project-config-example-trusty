@@ -18,31 +18,42 @@
           function pre_test_hook {{
               echo "Install thirdparty client libraries"
               #TODO: update your client here if needed, otherwise delete
-              sudo -H pip install mydriverclient
+              #sudo -H pip install mydriverclient
               echo "Configure the local.conf file to properly setup hp lefthand driver in cinder.conf"
               cat <<EOF >$BASE/new/devstack/local.conf
 
           [[post-config|\$CINDER_CONF]]
           [DEFAULT]
-          enabled_backends=mybackend
-          default_volume_type=myvolumetype
+          enabled_backends=TES90
+          default_volume_type=TES90
 
-          [mybackend]
-          # add you driver configuration here
-          volume_driver=cinder.volume.drivers.MyDriver
-          volume_backend_name=mybackend
-
+          [TES90]
+          volume_backend_name = TES90
+          qnap_management_url = http://10.77.230.90:8080
+          volume_driver = cinder.volume.drivers.qnap.QnapISCSIDriver
+          iscsi_ip_address = 10.77.230.91
+          qnap_storage_protocol = iscsi
+          san_login = admin
+          san_password = admin
+          qnap_poolname = manila-pool1
+          san_thin_provision = False
+          qnap_compression = True
+          qnap_deduplication = False
+          qnap_ssd_cache = True
+          use_chap_auth = False
+          chap_username = chris
+          chap_password = chris12345678
           # Use post-extra because the tempest configuration file is
           # overwritten with the .sample after post-config.
           [[post-extra|\$TEMPEST_CONFIG]]
           [volume]
           storage_protocol=iSCSI
-          vendor_name=MyVendor
+          vendor_name=QNAP
           EOF
 
               echo "Configure localrc file to properly setup CINDER_ENABLED_BACKENDS"
               cat <<EOF >>$BASE/new/devstack/localrc
-          CINDER_ENABLED_BACKENDS=mybackend:myvolumetype
+          CINDER_ENABLED_BACKENDS=TES90:TES90
           EOF
 
           }}
