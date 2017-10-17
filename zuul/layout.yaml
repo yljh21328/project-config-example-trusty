@@ -55,7 +55,7 @@ pipelines:
 
 jobs:
   - name: ^dsvm-tempest.*$
-    parameter-function: single_use_node
+    parameter-function: reusable_node
 
 projects:
   - name: openstack-dev/ci-sandbox

@@ -49,9 +49,12 @@ providers:
 #TODO: Update the provider username, password, and authurl
     username: 'admin'
     password: 'Aa12345678'
-    auth-url: 'http://10.77.210.47:5000/v2.0'
+    auth-url: 'http://10.77.201.138:5000/v2.0'
     project-name: 'admin'
     max-servers: 1
+    networks:
+      - name: private_network
+        public: true
     images:
       - name: dpc
         min-ram: 8192
