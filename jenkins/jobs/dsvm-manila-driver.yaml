@@ -1,0 +1,179 @@
+- job-template:
+    name: 'qnap-manila-driver'
+    node: '{node}'
+
+    wrappers:
+      - timeout:
+          timeout: 125
+          fail: true
+      - timestamps
+
+    builders:
+      - link-logs
+      - net-info
+      - devstack-checkout
+      - shell: |
+          #!/bin/bash -xe
+
+          function pre_test_hook {{
+              echo "Cherry-picking latest driver from gerrit"
+              cd $BASE/new/manila
+
+              # fetch latest patchset from gerrit
+              UPSTREAM_REMOTE="https://review.openstack.org/openstack/manila"
+
+              # set this to your gerrit change number
+
+              PATCHSET_BASE=refs/changes/97/509097
+              LATEST_PATCHSET=$(git ls-remote $UPSTREAM_REMOTE $PATCHSET_BASE/\* |
+                                sort -t/ -k 5 -n | tail -n1 | cut -d$'\t' -f2)
+
+              if [ -z "$LATEST_PATCHSET" ]; then
+                  echo "Failed to determine latest patchset of $PATCHSET_BASE from $UPSTREAM_REMOTE"
+                  exit 1
+              fi
+
+              echo "Latest patchset ref is $LATEST_PATCHSET"
+              git fetch $UPSTREAM_REMOTE $LATEST_PATCHSET && git cherry-pick FETCH_HEAD
+
+              echo "Configure the local.conf file to properly setup manila.conf"
+              cat <<EOF >$BASE/new/devstack/local.conf
+          [[local|localrc]]
+          DEST=/opt/stack/new/
+          enable_plugin manila https://git.openstack.org/openstack/manila
+
+
+          [[post-config|\$MANILA_CONF]]
+          [DEFAULT]
+          enabled_share_backends = london,paris
+          default_share_type = default
+          enabled_share_protocols = NFS
+
+          [london]
+          share_backend_name = LONDON
+          share_driver = manila.share.drivers.qnap.qnap.QnapShareDriver
+          driver_handles_share_servers = False
+          qnap_management_url = https://10.77.230.90:443
+          qnap_share_ip = 10.77.230.91
+          qnap_nas_login = admin
+          qnap_nas_password = admin
+          qnap_poolname = pool1
+          qnap_thin_provision=True
+          qnap_compression=True
+          qnap_deduplication=False
+          qnap_ssd_cache=False
+
+          [paris]
+          share_backend_name = PARIS
+          driver_handles_share_servers = False
+          share_driver = manila.share.drivers.qnap.qnap.QnapShareDriver
+          qnap_management_url = https://10.77.230.90:443
+          qnap_share_ip = 10.77.230.91
+          qnap_nas_login = admin
+          qnap_nas_password = admin
+          qnap_poolname = pool1
+          qnap_thin_provision=True
+          qnap_compression=True
+          qnap_deduplication=False
+          qnap_ssd_cache=False
+
+
+          [[test-config|\$TEMPEST_CONFIG]]
+          [service_available]
+          manila=True
+          [share]
+          enable_protocols = nfs
+          storage_protocol = NFS
+          enable_ip_rules_for_protocols = nfs
+          EOF
+
+              source $BASE/new/manila/contrib/ci/pre_test_hook.sh \
+                  False \
+                  qnap \
+                  singlebackend
+          }}
+
+
+
+          export PYTHONUNBUFFERED=true
+          export BUILD_TIMEOUT=14400000
+          export DEVSTACK_GATE_NEUTRON=1
+          export ENABLED_SERVICES=tempest
+          # The DEVSTACK_LOCAL_CONFIG has been configured.
+          #export 'DEVSTACK_LOCAL_CONFIG=enable_plugin manila https://github.com/openstack/manila'
+          export KEEP_LOCALRC=1
+          export MANILA_TEMPEST_CONCURRENCY=4
+          export RUN_MANILA_QUOTA_TESTS=False
+          export RUN_MANILA_SHRINK_TESTS=False
+          export RUN_MANILA_SNAPSHOT_TESTS=True
+          export RUN_MANILA_REVERT_TO_SNAPSHOT_TESTS=True
+          export RUN_MANILA_SG_TESTS=False
+          export RUN_MANILA_CG_TESTS=False
+          export RUN_MANILA_MANAGE_TESTS=True
+          export RUN_MANILA_MANAGE_SNAPSHOT_TESTS=True
+          export RUN_MANILA_REPLICATION_TESTS=False
+          export RUN_MANILA_HOST_ASSISTED_MIGRATION_TESTS=False
+          export RUN_MANILA_DRIVER_ASSISTED_MIGRATION_TESTS=False
+          export CAPABILITY_CREATE_SHARE_FROM_SNAPSHOT_SUPPORT=True
+          export MULTITENANCY_ENABLED=False
+          export SUPPRESS_ERRORS_IN_CLEANUP=False
+
+          export 'DEFAULT_EXTRA_SPECS='\''snapshot_support=True create_share_from_snapshot_support=True driver_handles_share_servers=False'\'''
+          export MANILA_UI_ENABLED=False
+          export 'PROJECTS=openstack/python-manilaclient '
+          export MANILA_SERVICE_IMAGE_ENABLED=True
+
+
+
+
+          #export OVERRIDE_ENABLED_SERVICES=key,mysql,rabbit,neutron,quantum,peakmem_tracker,placement-api,q-svc,q-agt,q-dhcp,q-l3,q-fwaas,q-lbaas,q-meta,q-metering,g-api,g-reg,n-api,n-cond,n-cpu,n-crt,n-obj,n-sch,n-cell,manila,m-api,m-shr,m-sch,tempest
+
+          #export DEVSTACK_GATE_TEMPEST_REGEX="manila_tempest_tests.tests.api"
+          #export 'DEVSTACK_GATE_TEMPEST_REGEX=^(?=manila_tempest_tests.tests.api*)(?!.*share_extend_with_less_size).*'
+          #export 'MANILA_TESTS=(^manila_tempest_tests.tests.api)(?=.*\[.*\bbackend\b.*\])'
+          export MANILA_TESTS="manila_tempest_tests.tests.api"
+          #export MANILA_TESTS="manila_tempest_tests.tests.api.admin.test_share_manage.ManageNFSShareTest.test_manage_with_os_share_manage_url"
+          export BACKENDS_NAMES=LONDON,PARIS
+
+
+
+
+          function post_test_hook {{
+              # 'back_end_type' - defines which installation Manila is
+              # configured to - either 'singlebackend' or 'multibackend'.
+              # 'driver' - codename of a share driver that is configured in
+              # Manila. It is used for enabling/disabling tests that are not
+              # supported by share driver that is used.
+              # 'test_type' - defines which set of test suites should be used,
+              # can have 'api' and 'scenario' values.
+              # 'postgres_enabled' - set of test suites depends on DB backend
+              # in some cases, so it is provided explicitely. Boolean-like.
+              source $BASE/new/manila/contrib/ci/post_test_hook.sh \
+                  singlebackend \
+                  qnap \
+                  api \
+                  False
+          }}
+
+          export -f pre_test_hook
+          export -f post_test_hook
+
+
+
+          # Let's use the http protocol instead of git protocol
+          export GIT_BASE=https://git.openstack.org
+
+          if [ -z $ZUUL_PROJECT ]; then
+              export ZUUL_PROJECT=openstack/manila
+          fi
+          if [ -z $ZUUL_BRANCH ]; then
+              export ZUUL_BRANCH=master
+          fi
+
+
+          cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
+          ./safe-devstack-vm-gate-wrap.sh
+
+    publishers:
+      - devstack-logs
+      - console-log

@@ -1,5 +1,5 @@
 - job-template:
-    name: 'dsvm-tempest-my-cinder-driver'
+    name: 'qnap-cinder-driver'
     node: '{node}'
 
     wrappers:
@@ -16,45 +16,73 @@
           #!/bin/bash -xe
 
           function pre_test_hook {{
-              echo "Install thirdparty client libraries"
-              #TODO: update your client here if needed, otherwise delete
-              #sudo -H pip install mydriverclient
-              echo "Configure the local.conf file to properly setup hp lefthand driver in cinder.conf"
-              cat <<EOF >$BASE/new/devstack/local.conf
+              echo "Cherry-picking latest driver from gerrit"
+              cd $BASE/new/cinder
 
+              # fetch latest patchset from gerrit
+              UPSTREAM_REMOTE="https://review.openstack.org/openstack/cinder"
+
+              # set this to your gerrit change number
+
+              PATCHSET_BASE=refs/changes/88/470188
+              LATEST_PATCHSET=$(git ls-remote $UPSTREAM_REMOTE $PATCHSET_BASE/\* |
+                                sort -t/ -k 5 -n | tail -n1 | cut -d$'\t' -f2)
+
+              if [ -z "$LATEST_PATCHSET" ]; then
+                  echo "Failed to determine latest patchset of $PATCHSET_BASE from $UPSTREAM_REMOTE"
+                  exit 1
+              fi
+
+              echo "Latest patchset ref is $LATEST_PATCHSET"
+              git fetch $UPSTREAM_REMOTE $LATEST_PATCHSET && git cherry-pick FETCH_HEAD
+
+              echo "Configure the local.conf file to properly setup cinder.conf"
+              cat <<EOF >$BASE/new/devstack/local.conf
           [[post-config|\$CINDER_CONF]]
           [DEFAULT]
-          enabled_backends=TES90
-          default_volume_type=TES90
+          enabled_backends=QCinderDriver1
+          default_volume_type=QCinderDriver1
+          periodic_interval=300
+          periodic_fuzzy_delay=300
 
-          [TES90]
-          volume_backend_name = TES90
-          qnap_management_url = http://10.77.230.90:8080
+          [QCinderDriver1]
+          # add you driver configuration here
+          volume_backend_name = QCinderDriver1
+          qnap_management_url=http://10.77.201.42:8080
           volume_driver = cinder.volume.drivers.qnap.QnapISCSIDriver
-          iscsi_ip_address = 10.77.230.91
+          iscsi_ip_address = 10.77.201.42
           qnap_storage_protocol = iscsi
           san_login = admin
           san_password = admin
-          qnap_poolname = manila-pool1
+          qnap_poolname = Storage Pool 1
           san_thin_provision = False
-          qnap_compression = True
-          qnap_deduplication = False
-          qnap_ssd_cache = True
-          use_chap_auth = False
-          chap_username = chris
-          chap_password = chris12345678
+
+
           # Use post-extra because the tempest configuration file is
           # overwritten with the .sample after post-config.
-          [[post-extra|\$TEMPEST_CONFIG]]
+          #[[post-extra|\$TEMPEST_CONFIG]]
+          # https://review.openstack.org/#/c/405446/
+          # https://bugs.launchpad.net/devstack/+bug/1646391
+          [[test-config|\$TEMPEST_CONFIG]]
           [volume]
-          storage_protocol=iSCSI
+          storage_protocol=iscsi
           vendor_name=QNAP
+
+          [volume-feature-enabled]
+          backup = False
+          manage_volume = False
+          manage_snapshot = False
           EOF
 
-              echo "Configure localrc file to properly setup CINDER_ENABLED_BACKENDS"
-              cat <<EOF >>$BASE/new/devstack/localrc
-          CINDER_ENABLED_BACKENDS=TES90:TES90
-          EOF
+          #    echo "Configure localrc file to properly setup CINDER_ENABLED_BACKENDS"
+          #    cat <<EOF >>$BASE/new/devstack/localrc
+          #ADMIN_PASSWORD=secretadmin
+          #DATABASE_PASSWORD=secretdatabase
+          #RABBIT_PASSWORD=secretrabbit
+          #SERVICE_PASSWORD=secretservice
+          #FORCE=yes
+          #CINDER_ENABLED_BACKENDS=QCinderDriver1
+          #EOF
 
           }}
 
@@ -62,17 +90,20 @@
 
           # To keep our CINDER_ENABLED_BACKENDS configuration in localrc
           export KEEP_LOCALRC=true
-
           export PYTHONUNBUFFERED=true
-          export DEVSTACK_GATE_TIMEOUT=120
+          export DEVSTACK_GATE_TIMEOUT=300
           export DEVSTACK_GATE_TEMPEST=1
+          export BUILD_TIMEOUT=14400000
+          export SSH_TIMEOUT=600
+          export DEVSTACK_GATE_TIMEOUT_BUFFER=20
           export DEVSTACK_GATE_TEMPEST_REGEX="volume"
+          #export DEVSTACK_GATE_TEMPEST_REGEX="^(?=.*volume*)(?!tempest.scenario.*)(?!.*test_volume_crud_with_volume_type_and_extra_specs)"
 
           # Let's use the http protocol instead of git protocol
           export GIT_BASE=https://git.openstack.org
 
           if [ -z $ZUUL_PROJECT ]; then
-              export ZUUL_PROJECT=openstack-dev/ci-sandbox
+              export ZUUL_PROJECT=openstack/cinder
           fi
           if [ -z $ZUUL_BRANCH ]; then
               export ZUUL_BRANCH=master
