@@ -1,4 +1,3 @@
-script-dir: /etc/nodepool/scripts
 elements-dir: /etc/nodepool/elements
 images-dir: /opt/nodepool_dib
 
@@ -15,21 +14,28 @@ cron:
 #   root@jenkins:~# echo "0 $((RANDOM%23+1)) * * *"
 #   0 16 * * *
 # This references the hour of the day when images will be built.
-  image-update: '0 0 * * *'
 
 zmq-publishers:
   - tcp://localhost:8888
 
 gearman-servers:
   - host: 127.0.0.1
+zookeeper-servers:
+  - host: 127.0.0.1
 
 labels:
   - name: d-p-c
     image: dpc
     ready-script: custom.sh
-    min-ready: 2
+    min-ready: 1
     providers:
       - name: local_01
+#  - name: d-p-c-manila
+#    image: dpc
+#    ready-script: custom.sh
+#    min-ready: 1
+#    providers:
+#      - name: local_02
 
 diskimages:
 #    - name: dpc
@@ -78,6 +84,26 @@ providers:
     username: 'admin'
     password: 'Aa12345678'
     auth-url: 'http://10.77.201.138:5000/v2.0'
+    #auth-url: 'http://10.77.201.22/identity'
+    project-name: 'admin'
+    boot-timeout: 600
+    launch-timeout: 900
+    max-servers: 2
+    networks:
+      - name: private_network
+      #- name: public
+        public: true
+    images:
+      - name: dpc
+        min-ram: 8192
+        diskimage: dpc
+        username: jenkins
+        private-key: '/home/nodepool/.ssh/id_rsa'
+  - name: local_02
+#TODO: Update the provider username, password, and authurl
+    username: 'admin'
+    password: 'Aa12345678'
+    auth-url: 'http://10.77.201.136:5000/v2.0'
     #auth-url: 'http://10.77.201.22/identity'
     project-name: 'admin'
     boot-timeout: 600

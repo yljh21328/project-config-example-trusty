@@ -53,10 +53,10 @@
           share_backend_name = LONDON
           share_driver = manila.share.drivers.qnap.qnap.QnapShareDriver
           driver_handles_share_servers = False
-          qnap_management_url = https://10.77.230.90:443
-          qnap_share_ip = 10.77.230.91
+          qnap_management_url = https://10.77.230.150:443
+          qnap_share_ip = 10.77.230.151
           qnap_nas_login = admin
-          qnap_nas_password = admin
+          qnap_nas_password = ciAa12345678
           qnap_poolname = pool1
           qnap_thin_provision=True
           qnap_compression=True
@@ -67,10 +67,10 @@
           share_backend_name = PARIS
           driver_handles_share_servers = False
           share_driver = manila.share.drivers.qnap.qnap.QnapShareDriver
-          qnap_management_url = https://10.77.230.90:443
-          qnap_share_ip = 10.77.230.91
+          qnap_management_url = https://10.77.230.150:443
+          qnap_share_ip = 10.77.230.151
           qnap_nas_login = admin
-          qnap_nas_password = admin
+          qnap_nas_password = ciAa12345678
           qnap_poolname = pool1
           qnap_thin_provision=True
           qnap_compression=True

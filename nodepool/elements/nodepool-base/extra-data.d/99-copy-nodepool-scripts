@@ -36,4 +36,5 @@ set -o pipefail
 NODEPOOL_SCRIPTDIR=${NODEPOOL_SCRIPTDIR:-$TMP_MOUNT_PATH/opt/git/openstack-infra/project-config/nodepool/scripts}
 
 sudo cp -a $NODEPOOL_SCRIPTDIR $TMP_MOUNT_PATH/opt/nodepool-scripts
+sudo cp -a /etc/nodepool/scripts/custom.sh $TMP_MOUNT_PATH/opt/nodepool-scripts
 sudo chmod -R a+rx $TMP_MOUNT_PATH/opt/nodepool-scripts

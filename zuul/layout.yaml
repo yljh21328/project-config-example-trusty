@@ -69,6 +69,6 @@ projects:
       # test a full Tempest run within devstack.
       #- dsvm-tempest-full
       #- noop-check-communication
-      - qnap-manila-driver
-      #- qnap-cinder-driver-iscsi
+      #- qnap-manila-driver
+       - qnap-cinder-driver
       #- dsvm-tempest-my-cinder-driver
