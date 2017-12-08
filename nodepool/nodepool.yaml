@@ -88,37 +88,37 @@ providers:
     project-name: 'admin'
     boot-timeout: 600
     launch-timeout: 900
-    max-servers: 2
+    max-servers: 1
     networks:
       - name: private_network
       #- name: public
         public: true
     images:
       - name: dpc
-        min-ram: 8192
+        min-ram: 16384
         diskimage: dpc
         username: jenkins
         private-key: '/home/nodepool/.ssh/id_rsa'
-  - name: local_02
+#  - name: local_02
 #TODO: Update the provider username, password, and authurl
-    username: 'admin'
-    password: 'Aa12345678'
-    auth-url: 'http://10.77.201.136:5000/v2.0'
+#    username: 'admin'
+#    password: 'Aa12345678'
+#    auth-url: 'http://10.77.201.136:5000/v2.0'
     #auth-url: 'http://10.77.201.22/identity'
-    project-name: 'admin'
-    boot-timeout: 600
-    launch-timeout: 900
-    max-servers: 2
-    networks:
-      - name: private_network
+#    project-name: 'admin'
+#    boot-timeout: 600
+#    launch-timeout: 900
+#    max-servers: 2
+#    networks:
+#      - name: private_network
       #- name: public
-        public: true
-    images:
-      - name: dpc
-        min-ram: 8192
-        diskimage: dpc
-        username: jenkins
-        private-key: '/home/nodepool/.ssh/id_rsa'
+#        public: true
+#    images:
+#      - name: dpc
+#        min-ram: 8192
+#        diskimage: dpc
+#        username: jenkins
+#        private-key: '/home/nodepool/.ssh/id_rsa'
 
 targets:
   - name: jenkins1

@@ -18,6 +18,7 @@
           function pre_test_hook {{
               echo "Cherry-picking latest driver from gerrit"
               cd $BASE/new/cinder
+              git show --oneline | head -1
 
               # fetch latest patchset from gerrit
               UPSTREAM_REMOTE="https://review.openstack.org/openstack/cinder"
@@ -53,9 +54,9 @@
           iscsi_ip_address = 10.77.201.42
           qnap_storage_protocol = iscsi
           san_login = admin
-          san_password = admin
+          san_password = Aa12345678
           qnap_poolname = Storage Pool 1
-          san_thin_provision = False
+          #san_thin_provision = False
 
 
           # Use post-extra because the tempest configuration file is

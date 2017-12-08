@@ -2,12 +2,11 @@
     name: sandbox
     github-org: openstack-dev
     node: master
-    vendor: myvendor
+    vendor: QNAP
 
     jobs:
-        - noop-check-communication
-        - dsvm-tempest-full:
-            node: 'devstack_slave || devstack-precise-check || d-p-c'
+        - noop-check-communication:
+            node: 'd-p-c'
         - qnap-cinder-driver:
             node: 'd-p-c'
         - qnap-manila-driver:
