@@ -120,7 +120,9 @@
 
           export 'DEFAULT_EXTRA_SPECS='\''snapshot_support=True create_share_from_snapshot_support=True driver_handles_share_servers=False'\'''
           export MANILA_UI_ENABLED=False
-          export 'PROJECTS=openstack/python-manilaclient '
+          #export 'PROJECTS=openstack/python-manilaclient '
+          # ref:http://lists.openstack.org/pipermail/openstack-dev/2017-December/125471.html
+          export PROJECTS="openstack/python-manilaclient openstack/manila-tempest-plugin $PROJECTS"
           export MANILA_SERVICE_IMAGE_ENABLED=True
 
 
